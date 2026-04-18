@@ -1,11 +1,5 @@
 spring:
+  profiles:
+    active: local
   application:
     name: rate-limiter
-
-server:
-  port: 8080
-
-proxy:
-  routes:
-    - path-pattern: "/api/**"
-      target-uri: "http://localhost:8081"
