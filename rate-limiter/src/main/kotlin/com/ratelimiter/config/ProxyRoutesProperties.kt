@@ -16,6 +16,12 @@ data class ProxyRoutesProperties(
     @field:Valid
     val routes: List<Route> = emptyList(),
 ) {
+    init {
+        require(defaultLimit > 0) { "defaultLimit must be greater than 0" }
+        val duplicates = routes.groupBy { it.pathPattern }.filter { it.value.size > 1 }
+        require(duplicates.isEmpty()) { "Duplicate path patterns found: ${duplicates.keys}" }
+    }
+
     data class Route(
         @field:NotBlank
         val pathPattern: String,

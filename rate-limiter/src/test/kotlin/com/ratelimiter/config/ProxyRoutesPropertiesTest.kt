@@ -38,6 +38,16 @@ class ProxyRoutesPropertiesTest {
     }
 
     @Test
+    fun `should fail validation when defaultLimit is less than 1`() {
+        contextRunner.withPropertyValues(
+            "proxy.default-limit=0" // 유효하지 않은 값
+        ).run { context ->
+            assertThat(context).hasFailed()
+            assertThat(context.startupFailure).rootCause().hasMessageContaining("defaultLimit must be greater than 0")
+        }
+    }
+
+    @Test
     fun `should fail validation when route limit is less than 1`() {
         contextRunner.withPropertyValues(
             "proxy.routes[0].path-pattern=/api/foo",
@@ -45,6 +55,19 @@ class ProxyRoutesPropertiesTest {
             "proxy.routes[0].limit=-5" // 유효하지 않은 값
         ).run { context ->
             assertThat(context).hasFailed()
+        }
+    }
+
+    @Test
+    fun `should fail validation when duplicate path patterns exist`() {
+        contextRunner.withPropertyValues(
+            "proxy.routes[0].path-pattern=/api/foo",
+            "proxy.routes[0].target-uri=http://localhost:8081",
+            "proxy.routes[1].path-pattern=/api/foo",
+            "proxy.routes[1].target-uri=http://localhost:8082"
+        ).run { context ->
+            assertThat(context).hasFailed()
+            assertThat(context.startupFailure).rootCause().hasMessageContaining("Duplicate path patterns found")
         }
     }
 }
