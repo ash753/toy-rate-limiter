@@ -1,12 +1,30 @@
 package com.ratelimiter.config
 
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotBlank
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.util.pattern.PathPattern
 import org.springframework.web.util.pattern.PathPatternParser
 
+@Validated
 @ConfigurationProperties(prefix = "proxy")
-data class ProxyRoutesProperties(val routes: List<Route> = emptyList()) {
-    data class Route(val pathPattern: String, val targetUri: String) {
+data class ProxyRoutesProperties(
+    @field:Min(1)
+    val defaultLimit: Int = 200,
+    @field:Valid
+    val routes: List<Route> = emptyList(),
+) {
+    data class Route(
+        @field:NotBlank
+        val pathPattern: String,
+        @field:NotBlank
+        val targetUri: String,
+        @field:Min(1)
+        val limit: Int? = null,
+        val perIp: Boolean = false,
+    ) {
         val parsedPattern: PathPattern by lazy {
             PathPatternParser.defaultInstance.parse(pathPattern)
         }
