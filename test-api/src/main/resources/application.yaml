@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: test-api
+
+server:
+  port: 8081
