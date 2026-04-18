@@ -4,3 +4,8 @@ spring:
 
 server:
   port: 8080
+
+proxy:
+  routes:
+    - path-pattern: "/api/**"
+      target-uri: "http://localhost:8081"
