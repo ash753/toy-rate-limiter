@@ -1,5 +1,6 @@
 package com.ratelimiter.common
 
+import org.springframework.http.HttpStatus
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -11,13 +12,13 @@ data class ApiResponse<T>(
 ) {
     companion object {
         fun <T> success(data: T): ApiResponse<T> = ApiResponse(
-            status = 200,
+            status = HttpStatus.OK.value(),
             message = "OK",
             data = data
         )
 
         fun success(): ApiResponse<Unit> = ApiResponse(
-            status = 200,
+            status = HttpStatus.OK.value(),
             message = "OK"
         )
 
