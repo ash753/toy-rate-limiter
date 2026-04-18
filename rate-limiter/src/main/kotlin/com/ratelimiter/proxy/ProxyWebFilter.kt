@@ -1,11 +1,8 @@
 package com.ratelimiter.proxy
 
-import com.ratelimiter.common.ApiResponse
 import com.ratelimiter.config.ProxyRoutesProperties
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.server.ServerWebExchange
@@ -35,15 +32,7 @@ class ProxyWebFilter(
         }
 
         if (matchedRoute == null) {
-            val response = exchange.response
-            response.statusCode = HttpStatus.NOT_FOUND
-            response.headers.contentType = MediaType.APPLICATION_JSON
-
-            val apiResponse = ApiResponse.error<Unit>(HttpStatus.NOT_FOUND.value(), "Not Found Route")
-            val bytes = objectMapper.writeValueAsBytes(apiResponse)
-            val buffer = response.bufferFactory().wrap(bytes)
-
-            return response.writeWith(Mono.just(buffer))
+            return chain.filter(exchange)
         }
 
         val targetUri = URI.create(matchedRoute.targetUri)
