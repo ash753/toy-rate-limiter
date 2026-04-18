@@ -1,6 +1,5 @@
 package com.ratelimiter.proxy
 
-import com.ratelimiter.config.ProxyRoutesProperties
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -8,28 +7,21 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
-import org.springframework.web.util.pattern.PathPatternParser
 import reactor.core.publisher.Mono
-import tools.jackson.databind.ObjectMapper
 import java.net.URI
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class ProxyWebFilter(
-    private val proxyRoutesProperties: ProxyRoutesProperties,
+    private val routeMatcher: RouteMatcher,
     private val webClient: WebClient,
-    private val objectMapper: ObjectMapper
 ) : WebFilter {
-
-    private val pathPatternParser = PathPatternParser()
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
+        val pathWithinApplication = request.path.pathWithinApplication()
 
-        val matchedRoute = proxyRoutesProperties.routes.find { route ->
-            val pattern = pathPatternParser.parse(route.pathPattern)
-            pattern.matches(request.path.pathWithinApplication())
-        }
+        val matchedRoute = routeMatcher.findMatch(pathWithinApplication)
 
         if (matchedRoute == null) {
             return chain.filter(exchange)
