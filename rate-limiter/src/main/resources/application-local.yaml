@@ -2,6 +2,15 @@ server:
   port: 8080
 
 proxy:
+  default-limit: 200
   routes:
+    - path-pattern: "/api/foo"
+      target-uri: "http://localhost:8081"
+      limit: 100
+      per-ip: false
+    - path-pattern: "/api/bar"
+      target-uri: "http://localhost:8081"
+      limit: 50
+      per-ip: true
     - path-pattern: "/api/**"
       target-uri: "http://localhost:8081"
