@@ -42,8 +42,9 @@ else: current_count += 1, 허용
 
 ### 반환
 ```
-{allowed (1/0), remainCount (정수), retryAfterSeconds (정수, 차단 시만 의미있음)}
+{allowed (1/0), remainCount (정수), retryAfterSeconds (정수, 다음 윈도우 시작까지 남은 시간)}
 ```
+- **Retry-After 전략:** 다음 윈도우가 시작될 때까지의 잔여 시간을 반환하여 클라이언트의 즉각적인 재시도를 억제하고 전체 시스템(Gateway, Redis)의 부하를 보호함.
 
 ### 시간 기준
 - 스크립트 내부에서 `redis.call('TIME')`로 현재 시간 획득
