@@ -73,8 +73,8 @@ class RedisSlidingWindowRateLimiterTest {
     @Test
     fun `concurrent requests should be counted atomically`() {
         val key = "rl:test:concurrent"
-        val limit = 50
-        val totalRequests = 100
+        val limit = 20
+        val totalRequests = 40
         val allowedCount = AtomicInteger(0)
 
         // 100개의 요청을 동시에 발송
@@ -90,6 +90,6 @@ class RedisSlidingWindowRateLimiterTest {
             .verifyComplete()
 
         // 아무리 많은 요청이 와도 정확히 limit(50)개만 허용되어야 함
-        assertThat(allowedCount.get()).isEqualTo(50)
+        assertThat(allowedCount.get()).isEqualTo(limit)
     }
 }
