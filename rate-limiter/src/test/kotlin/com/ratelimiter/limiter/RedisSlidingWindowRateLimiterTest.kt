@@ -10,7 +10,8 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.util.concurrent.CountDownLatch
+import reactor.core.publisher.Flux
+import reactor.test.StepVerifier
 import java.util.concurrent.atomic.AtomicInteger
 
 @Testcontainers
@@ -38,10 +39,13 @@ class RedisSlidingWindowRateLimiterTest {
         val key = "rl:test:under"
         val limit = 5
 
-        val result = rateLimiter.check(key, limit).block()!!
-
-        assertThat(result.allowed).isTrue()
-        assertThat(result.remainCount).isEqualTo(4)
+        rateLimiter.check(key, limit)
+            .`as`(StepVerifier::create)
+            .assertNext { result ->
+                assertThat(result.allowed).isTrue()
+                assertThat(result.remainCount).isEqualTo(4)
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -50,15 +54,20 @@ class RedisSlidingWindowRateLimiterTest {
         val limit = 3
 
         // 3번 요청 허용
-        repeat(3) {
-            val r = rateLimiter.check(key, limit).block()!!
-            assertThat(r.allowed).isTrue()
-        }
+        Flux.range(1, 3)
+            .flatMap { rateLimiter.check(key, limit) }
+            .`as`(StepVerifier::create)
+            .expectNextCount(3)
+            .verifyComplete()
 
         // 4번째 요청 차단
-        val blockResult = rateLimiter.check(key, limit).block()!!
-        assertThat(blockResult.allowed).isFalse()
-        assertThat(blockResult.retryAfterSeconds).isGreaterThan(0)
+        rateLimiter.check(key, limit)
+            .`as`(StepVerifier::create)
+            .assertNext { result ->
+                assertThat(result.allowed).isFalse()
+                assertThat(result.retryAfterSeconds).isGreaterThan(0)
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -66,24 +75,19 @@ class RedisSlidingWindowRateLimiterTest {
         val key = "rl:test:concurrent"
         val limit = 50
         val totalRequests = 100
-        val latch = CountDownLatch(totalRequests)
         val allowedCount = AtomicInteger(0)
 
         // 100개의 요청을 동시에 발송
-        repeat(totalRequests) {
-            Thread {
-                try {
-                    val result = rateLimiter.check(key, limit).block()
-                    if (result?.allowed == true) {
-                        allowedCount.incrementAndGet()
-                    }
-                } finally {
-                    latch.countDown()
+        Flux.range(1, totalRequests)
+            .flatMap { rateLimiter.check(key, limit) }
+            .doOnNext { result ->
+                if (result.allowed) {
+                    allowedCount.incrementAndGet()
                 }
-            }.start()
-        }
-
-        latch.await()
+            }
+            .`as`(StepVerifier::create)
+            .expectNextCount(totalRequests.toLong())
+            .verifyComplete()
 
         // 아무리 많은 요청이 와도 정확히 limit(50)개만 허용되어야 함
         assertThat(allowedCount.get()).isEqualTo(50)
