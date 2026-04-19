@@ -25,5 +25,5 @@ end
 
 redis.call('INCR', cur_key)
 redis.call('EXPIRE', cur_key, ttl)
-local remaining = math.floor(limit - estimated - 1)
-return {1, remaining, 0}
+local remainCount = math.floor(limit - estimated - 1)
+return {1, remainCount, 0}
