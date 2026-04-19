@@ -3,6 +3,8 @@ server:
 
 proxy:
   default-limit: 200
+  window-size: 60
+  ttl: 120
   routes:
     - path-pattern: "/api/foo"
       target-uri: "http://localhost:8081"
