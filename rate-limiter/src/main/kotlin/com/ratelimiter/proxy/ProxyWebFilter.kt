@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 import java.net.URI
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(2)
 class ProxyWebFilter(
     private val routeMatcher: RouteMatcher,
     private val webClient: WebClient,
