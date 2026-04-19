@@ -13,6 +13,10 @@ import org.springframework.web.util.pattern.PathPatternParser
 data class ProxyRoutesProperties(
     @field:Min(1)
     val defaultLimit: Int = 200,
+    @field:Min(1)
+    val windowSize: Int = 60,
+    @field:Min(1)
+    val ttl: Int = 120,
     @field:Valid
     val routes: List<Route> = emptyList(),
 ) {
