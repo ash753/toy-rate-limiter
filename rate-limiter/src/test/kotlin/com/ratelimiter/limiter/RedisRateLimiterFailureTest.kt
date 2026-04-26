@@ -32,11 +32,13 @@ class RedisRateLimiterFailureTest {
             ttl = 10,
             routes = emptyList()
         )
-        // 테스트를 위해 서킷 브레이커 설정을 아주 작게 조정 (5번 호출 중 1번만 실패해도 오픈)
+        // 테스트를 위해 서킷 브레이커 설정을 아주 작게 조정
         val config = io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.custom()
             .failureRateThreshold(20f)
             .minimumNumberOfCalls(5)
             .slidingWindowSize(10)
+            .waitDurationInOpenState(Duration.ofMillis(500)) // 복구 테스트를 위해 대기 시간 단축
+            .permittedNumberOfCallsInHalfOpenState(2)
             .build()
         
         circuitBreakerRegistry = CircuitBreakerRegistry.of(config)
@@ -115,5 +117,40 @@ class RedisRateLimiterFailureTest {
                 assertThat(result.allowed).isTrue()
             }
             .verifyComplete()
+    }
+
+    @Test
+    fun `should recover to CLOSED state after success in HALF_OPEN`() {
+        // given
+        val key = "rl:recover"
+        val limit = 10
+        val cb = circuitBreakerRegistry.circuitBreaker(REDIS_RATE_LIMITER_NAME)
+        
+        // 1. 서킷 오픈시키기
+        every {
+            redisTemplate.execute(any<RedisScript<List<Long>>>(), any(), any())
+        } returns Flux.error(RedisConnectionFailureException("Fail"))
+        
+        repeat(6) { rateLimiter.check(key, limit).block() }
+        assertThat(cb.state).isEqualTo(io.github.resilience4j.circuitbreaker.CircuitBreaker.State.OPEN)
+        
+        // 2. 대기 시간(500ms) 지날 때까지 대기
+        Thread.sleep(600)
+        
+        // 3. Redis 복구 상황 시뮬레이션
+        every {
+            redisTemplate.execute(any<RedisScript<List<Long>>>(), any(), any())
+        } returns Flux.just(listOf(1L, 9L, 0L)) // 성공 응답
+        
+        // 4. HALF_OPEN 상태 확인을 위한 호출
+        // Resilience4j는 OPEN 상태에서 대기 시간이 지난 후 첫 호출이 들어와야 HALF_OPEN으로 전환됨
+        rateLimiter.check(key, limit).block()
+        assertThat(cb.state).isEqualTo(io.github.resilience4j.circuitbreaker.CircuitBreaker.State.HALF_OPEN)
+        
+        // 5. 추가 성공 호출로 CLOSED 전환 유도
+        rateLimiter.check(key, limit).block()
+        
+        // then: 복구 확인
+        assertThat(cb.state).isEqualTo(io.github.resilience4j.circuitbreaker.CircuitBreaker.State.CLOSED)
     }
 }
