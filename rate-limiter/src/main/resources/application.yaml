@@ -3,3 +3,25 @@ spring:
     active: local
   application:
     name: rate-limiter
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        event-consumer-buffer-size: 10
+    instances:
+      redisRateLimiter:
+        base-config: default
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        record-exceptions:
+          - org.springframework.dao.QueryTimeoutException
+          - org.springframework.data.redis.RedisConnectionFailureException
+          - org.springframework.data.redis.RedisSystemException
+          - io.lettuce.core.RedisCommandTimeoutException
+        automatic-transition-from-open-to-half-open-enabled: true
