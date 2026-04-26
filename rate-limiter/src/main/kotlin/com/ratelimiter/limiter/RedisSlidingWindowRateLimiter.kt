@@ -1,5 +1,6 @@
 package com.ratelimiter.limiter
 
+import com.ratelimiter.common.RateLimitConstants.REDIS_RATE_LIMITER_NAME
 import com.ratelimiter.config.ProxyRoutesProperties
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator
@@ -19,7 +20,7 @@ class RedisSlidingWindowRateLimiter(
 ) : RateLimiter {
 
     private val log = LoggerFactory.getLogger(javaClass)
-    private val circuitBreaker = circuitBreakerRegistry.circuitBreaker("redisRateLimiter")
+    private val circuitBreaker = circuitBreakerRegistry.circuitBreaker(REDIS_RATE_LIMITER_NAME)
 
     override fun check(keyPrefix: String, limit: Int): Mono<RateLimitResult> {
         // ARGV: [limit, window_size, ttl]
