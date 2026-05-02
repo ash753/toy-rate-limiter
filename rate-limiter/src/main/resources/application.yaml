@@ -4,8 +4,35 @@ spring:
   application:
     name: rate-limiter
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - prometheus
+          - metrics
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        ratelimit.redis.latency: true
+      percentiles:
+        ratelimit.redis.latency: 0.5, 0.95, 0.99
+
 resilience4j:
   circuitbreaker:
+    metrics:
+      enabled: true
     configs:
       default:
         registerHealthIndicator: true

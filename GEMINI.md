@@ -25,6 +25,8 @@
 
 ## 빌드 및 실행 방법
 
+> **참고:** 이 프로젝트는 루트 디렉토리에 `gradlew`가 없으며, 각 모듈(`rate-limiter/`, `test-api/`) 내에 개별적으로 `gradlew`가 포함되어 있습니다. 아래 명령어는 루트 디렉토리에서 실행하는 기준입니다.
+
 ### 사전 준비
 *   Java 21
 *   Docker & Docker Compose (Redis 실행용)
@@ -38,13 +40,13 @@
 
 2.  **Test API 서버 실행 (Backend):**
     ```bash
-    ./gradlew :test-api:bootRun
+    ./test-api/gradlew -p test-api bootRun
     ```
     서버가 `8081` 포트에서 실행됩니다.
 
 3.  **Rate Limiter 서버 실행 (Gateway):**
     ```bash
-    ./gradlew :rate-limiter:bootRun
+    ./rate-limiter/gradlew -p rate-limiter bootRun
     ```
     서버가 `8080` 포트에서 실행됩니다. 기본적으로 `local` 프로파일이 활성화되어 있어 `/api/**` 요청을 `localhost:8081`로 전달합니다.
 
@@ -55,9 +57,11 @@
     ```
 
 ### 프로젝트 빌드
-실행 가능한 JAR 파일을 생성하려면 다음 명령을 사용합니다:
+특정 모듈을 빌드하려면 해당 모듈의 `gradlew`를 사용합니다:
 ```bash
-./gradlew build
+# 전체 빌드 예시 (각 모듈에서 실행)
+./rate-limiter/gradlew -p rate-limiter build
+./test-api/gradlew -p test-api build
 ```
 
 ## 프로젝트 구조 및 아키텍처

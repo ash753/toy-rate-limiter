@@ -2,7 +2,9 @@ package com.ratelimiter.limiter
 
 import com.ratelimiter.common.RateLimitConstants.REDIS_RATE_LIMITER_NAME
 import com.ratelimiter.config.ProxyRoutesProperties
+import com.ratelimiter.metrics.RateLimitMetrics
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -21,6 +23,7 @@ class RedisRateLimiterFailureTest {
     private lateinit var slidingWindowScript: RedisScript<List<Long>>
     private lateinit var proxyRoutesProperties: ProxyRoutesProperties
     private lateinit var circuitBreakerRegistry: CircuitBreakerRegistry
+    private lateinit var metrics: RateLimitMetrics
     private lateinit var rateLimiter: RedisSlidingWindowRateLimiter
 
     @BeforeEach
@@ -42,11 +45,13 @@ class RedisRateLimiterFailureTest {
             .build()
         
         circuitBreakerRegistry = CircuitBreakerRegistry.of(config)
+        metrics = RateLimitMetrics(SimpleMeterRegistry())
         
         rateLimiter = RedisSlidingWindowRateLimiter(
             redisTemplate,
             slidingWindowScript,
             proxyRoutesProperties,
+            metrics,
             circuitBreakerRegistry
         )
     }

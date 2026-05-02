@@ -4,6 +4,7 @@ import com.ratelimiter.common.IpExtractor
 import com.ratelimiter.common.RateLimitConstants
 import com.ratelimiter.config.ProxyRoutesProperties
 import com.ratelimiter.limiter.RateLimiter
+import com.ratelimiter.metrics.RateLimitMetrics
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -20,6 +21,7 @@ class RateLimitWebFilter(
     private val routeMatcher: RouteMatcher,
     private val rateLimiter: RateLimiter,
     private val proxyRoutesProperties: ProxyRoutesProperties,
+    private val metrics: RateLimitMetrics,
 ) : WebFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -32,6 +34,13 @@ class RateLimitWebFilter(
 
         return rateLimiter.check(keyPrefix, limit)
             .flatMap { result ->
+                val resultLabel = when {
+                    result.isFailOpen -> "failopen"
+                    result.allowed -> "allowed"
+                    else -> "blocked"
+                }
+                metrics.recordRequest(route.pathPattern, resultLabel)
+
                 val response = exchange.response
                 response.headers.set(RateLimitConstants.HEADER_LIMIT, limit.toString())
                 response.headers.set(RateLimitConstants.HEADER_REMAINING, result.remainCount.toString())
