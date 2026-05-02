@@ -26,30 +26,32 @@ class RedisSlidingWindowRateLimiter(
     private val circuitBreaker = circuitBreakerRegistry.circuitBreaker(REDIS_RATE_LIMITER_NAME)
 
     override fun check(keyPrefix: String, limit: Int): Mono<RateLimitResult> {
-        val sample = Timer.start()
+        return Mono.defer {
+            val sample = Timer.start()
+            
+            // ARGV: [limit, window_size, ttl]
+            val args = listOf(
+                limit.toString(),
+                proxyRoutesProperties.windowSize.toString(),
+                proxyRoutesProperties.ttl.toString()
+            )
 
-        // ARGV: [limit, window_size, ttl]
-        val args = listOf(
-            limit.toString(),
-            proxyRoutesProperties.windowSize.toString(),
-            proxyRoutesProperties.ttl.toString()
-        )
-
-        return redisTemplate.execute(
-            slidingWindowScript,
-            listOf(keyPrefix),
-            args
-        )
-            .next()
-            .map { result ->
-                RateLimitResult(
-                    allowed = result[0] == 1L,
-                    remainCount = result[1].toInt().coerceAtLeast(0),
-                    retryAfterSeconds = result[2].toInt(),
-                    isFailOpen = false
-                )
-            }
-            .doFinally { sample.stop(metrics.redisLatency) }
+            redisTemplate.execute(
+                slidingWindowScript,
+                listOf(keyPrefix),
+                args
+            )
+                .next()
+                .map { result ->
+                    RateLimitResult(
+                        allowed = result[0] == 1L,
+                        remainCount = result[1].toInt().coerceAtLeast(0),
+                        retryAfterSeconds = result[2].toInt(),
+                        isFailOpen = false
+                    )
+                }
+                .doFinally { sample.stop(metrics.redisLatency) }
+        }
             .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
             .timeout(Duration.ofMillis(500))
             .onErrorResume { t ->
