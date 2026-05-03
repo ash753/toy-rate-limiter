@@ -42,3 +42,4 @@ Thumbs.db
 ### Log ###
 *.log
 HELP.md
+/ngrinder-controller/

@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    redis:
+      host: redis
+      port: 6379
+      timeout: 500ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+
+proxy:
+  default-limit: 200
+  window-size: 60
+  ttl: 120
+  routes:
+    - path-pattern: "/api/foo/**"
+      target-uri: "http://test-api:8081"
+      limit: 100
+      per-ip: false
+    - path-pattern: "/api/bar/**"
+      target-uri: "http://test-api:8081"
+      limit: 50
+      per-ip: true
+    - path-pattern: "/api/**"
+      target-uri: "http://test-api:8081"
