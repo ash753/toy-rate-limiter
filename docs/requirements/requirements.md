@@ -21,12 +21,6 @@
   - Prometheus
   - Grafana
 
-## Kubernetes 배포
-
-- 서버 1 (Rate Limiter): Deployment, replica 2개, LoadBalancer
-- 서버 2 (Test API): Deployment, replica 2개, ClusterIP (서버 1에서만 접근)
-- Redis: 별도 배포
-
 # 처리율 제한 장치 서버
 
 ## 동작
@@ -103,7 +97,13 @@ rate-limit:
   - Fail-open 발생 횟수
 - Grafana 기본 대시보드 템플릿 제공
 
-## 테스트 / 검증
+## Kubernetes 배포
+
+- 서버 1 (Rate Limiter): Deployment, replica 2개, LoadBalancer
+- 서버 2 (Test API): Deployment, replica 2개, ClusterIP (서버 1에서만 접근)
+- Redis: 별도 배포
+
+# 테스트 / 검증
 
 - nGrinder 테스트 및 정책 검증: nGrinder를 사용하여 다양한 시나리오에서 정책이 정확히 동작하는지 검증
 - 단위/통합 테스트: Testcontainers로 Redis 구동
