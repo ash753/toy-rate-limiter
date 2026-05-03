@@ -3,6 +3,8 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    networks:
+      - ngrinder-net
 
   prometheus:
     image: prom/prometheus:latest
@@ -12,6 +14,8 @@ services:
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
+    networks:
+      - ngrinder-net
 
   grafana:
     image: grafana/grafana:latest
@@ -24,6 +28,60 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
       - grafana_data:/var/lib/grafana
+    networks:
+      - ngrinder-net
+
+  test-api:
+    build:
+      context: ./test-api
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    networks:
+      - ngrinder-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  rate-limiter:
+    build:
+      context: ./rate-limiter
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - ngrinder-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - redis
+
+  ngrinder-controller:
+    image: ngrinder/controller:3.5.3
+    ports:
+      - "80:80"
+      - "16001:16001"
+    volumes:
+      - ./ngrinder-controller:/opt/ngrinder-controller
+    networks:
+      ngrinder-net:
+        aliases:
+          - controller
+
+  ngrinder-agent:
+    image: ngrinder/agent:3.5.3
+    command: controller:16001
+    depends_on:
+      - ngrinder-controller
+    networks:
+      ngrinder-net:
+        aliases:
+          - agent
+    environment:
+      - NGRINDER_CONTROLLER_HOST=ngrinder-controller
+
+networks:
+  ngrinder-net:
+    driver: bridge
 
 volumes:
   prometheus_data:
