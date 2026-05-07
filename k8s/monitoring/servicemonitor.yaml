@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rate-limiter
+  namespace: rate-limiter
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: rate-limiter
+  namespaceSelector:
+    matchNames:
+      - rate-limiter
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 15s

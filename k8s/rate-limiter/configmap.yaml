@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rate-limiter-config
+  namespace: rate-limiter
+data:
+  application-k8s.yaml: |
+    server:
+      port: 8080
+      forward-headers-strategy: native
+    spring:
+      data:
+        redis:
+          host: redis
+          port: 6379
+          timeout: 500ms
+          lettuce:
+            pool:
+              max-active: 64
+              max-idle: 32
+    proxy:
+      default-limit: 200
+      window-size: 60
+      ttl: 120
+      routes:
+        - path-pattern: "/api/foo/**"
+          target-uri: "http://test-api:8081"
+          limit: 100
+          per-ip: false
+        - path-pattern: "/api/bar/**"
+          target-uri: "http://test-api:8081"
+          limit: 50
+          per-ip: true
+        - path-pattern: "/api/**"
+          target-uri: "http://test-api:8081"
+    resilience4j:
+      circuitbreaker:
+        instances:
+          redisRateLimiter:
+            sliding-window-size: 10
+            minimum-number-of-calls: 10
+            failure-rate-threshold: 50
+            wait-duration-in-open-state: 30s
+            permitted-number-of-calls-in-half-open-state: 3
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: health, info, prometheus

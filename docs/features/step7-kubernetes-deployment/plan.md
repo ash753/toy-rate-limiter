@@ -89,9 +89,8 @@ toy-rate-limiter/
 │   │   ├── controller-service.yaml
 │   │   └── agent-deployment.yaml
 │   └── monitoring/
-│       └── servicemonitor.yaml
-├── monitoring/
-│   └── prometheus-values.yaml
+│       ├── servicemonitor.yaml
+│       └── prometheus-values.yaml
 └── deploy.sh
 ```
 

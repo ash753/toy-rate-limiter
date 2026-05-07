@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrinder-agent
+  namespace: rate-limiter
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ngrinder-agent
+  template:
+    metadata:
+      labels:
+        app: ngrinder-agent
+    spec:
+      containers:
+        - name: ngrinder-agent
+          image: ngrinder/agent:3.5.3
+          args: ["ngrinder-controller:80"]
+          env:
+            - name: NGRINDER_CONTROLLER_HOST
+              value: "ngrinder-controller"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "0.5"
+            limits:
+              memory: "512Mi"
+              cpu: "1.0"

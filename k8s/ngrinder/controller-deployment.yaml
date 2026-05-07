@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrinder-controller
+  namespace: rate-limiter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ngrinder-controller
+  template:
+    metadata:
+      labels:
+        app: ngrinder-controller
+    spec:
+      containers:
+        - name: ngrinder-controller
+          image: ngrinder/controller:3.5.3
+          ports:
+            - containerPort: 80
+            - containerPort: 16001
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1.0"
+            limits:
+              memory: "1.5Gi"
+              cpu: "2.0"
+          volumeMounts:
+            - name: data
+              mountPath: /opt/ngrinder-controller
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngrinder-controller
+  namespace: rate-limiter
+spec:
+  type: ClusterIP
+  selector:
+    app: ngrinder-controller
+  ports:
+    - name: web
+      port: 80
+      targetPort: 80
+    - name: agent
+      port: 16001
+      targetPort: 16001
