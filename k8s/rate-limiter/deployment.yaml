@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rate-limiter
+  namespace: rate-limiter
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rate-limiter
+  template:
+    metadata:
+      labels:
+        app: rate-limiter
+    spec:
+      containers:
+        - name: rate-limiter
+          image: rate-limiter:0.1.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--spring.config.additional-location=file:/app/config/application-k8s.yaml"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "1.0"
+            limits:
+              memory: "1Gi"
+              cpu: "1.5"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 40
+      volumes:
+        - name: config
+          configMap:
+            name: rate-limiter-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rate-limiter
+  namespace: rate-limiter
+spec:
+  type: ClusterIP
+  selector:
+    app: rate-limiter
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

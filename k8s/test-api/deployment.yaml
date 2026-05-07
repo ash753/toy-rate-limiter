@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+  namespace: rate-limiter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-api
+  template:
+    metadata:
+      labels:
+        app: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: test-api:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "0.5"
+            limits:
+              memory: "512Mi"
+              cpu: "1.0"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 40
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-api
+  namespace: rate-limiter
+spec:
+  type: ClusterIP
+  selector:
+    app: test-api
+  ports:
+    - port: 8081
+      targetPort: 8081
