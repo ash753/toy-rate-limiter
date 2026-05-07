@@ -31,7 +31,8 @@ spec:
               mountPath: /opt/ngrinder-controller
       volumes:
         - name: data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: ngrinder-controller-pvc
 ---
 apiVersion: v1
 kind: Service

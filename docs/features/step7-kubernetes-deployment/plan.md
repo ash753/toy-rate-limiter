@@ -51,7 +51,8 @@
 
 #### 3-5. nGrinder
 - **ngrinder-controller**: Deployment (1 replica), CPU 2.0/Memory 1.5GB
-- **ngrinder-agent**: Deployment (**2 replicas**), CPU 1.0/Memory 512MB
+  - **데이터 보존**: `PersistentVolumeClaim`을 사용하여 `/opt/ngrinder-controller` 데이터 영속성 확보.
+- **ngrinder-agent**: Deployment (2 replicas), CPU 1.0/Memory 512MB
 
 ### 4. 모니터링 스택 (Helm)
 
