@@ -19,12 +19,25 @@ spec:
           ports:
             - containerPort: 80
             - containerPort: 16001
+            - containerPort: 12000
+            - containerPort: 12001
+            - containerPort: 12002
+            - containerPort: 12003
+            - containerPort: 12004
+            - containerPort: 12005
+            - containerPort: 12006
+            - containerPort: 12007
+            - containerPort: 12008
+            - containerPort: 12009
+          env:
+            - name: JAVA_OPTS
+              value: "-Xms2g -Xmx3g -XX:+UseContainerSupport"
           resources:
             requests:
-              memory: "1Gi"
+              memory: "2Gi"
               cpu: "1.0"
             limits:
-              memory: "1.5Gi"
+              memory: "4Gi"
               cpu: "2.0"
           volumeMounts:
             - name: data
@@ -50,3 +63,33 @@ spec:
     - name: agent
       port: 16001
       targetPort: 16001
+    - name: console-0
+      port: 12000
+      targetPort: 12000
+    - name: console-1
+      port: 12001
+      targetPort: 12001
+    - name: console-2
+      port: 12002
+      targetPort: 12002
+    - name: console-3
+      port: 12003
+      targetPort: 12003
+    - name: console-4
+      port: 12004
+      targetPort: 12004
+    - name: console-5
+      port: 12005
+      targetPort: 12005
+    - name: console-6
+      port: 12006
+      targetPort: 12006
+    - name: console-7
+      port: 12007
+      targetPort: 12007
+    - name: console-8
+      port: 12008
+      targetPort: 12008
+    - name: console-9
+      port: 12009
+      targetPort: 12009

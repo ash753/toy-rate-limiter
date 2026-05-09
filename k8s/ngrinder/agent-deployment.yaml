@@ -22,8 +22,8 @@ spec:
               value: "ngrinder-controller"
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "0.5"
-            limits:
-              memory: "512Mi"
+              memory: "1Gi"
               cpu: "1.0"
+            limits:
+              memory: "1Gi"
+              cpu: "2.0"
