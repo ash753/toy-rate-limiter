@@ -51,6 +51,8 @@ kind: Service
 metadata:
   name: rate-limiter
   namespace: rate-limiter
+  labels:
+    app: rate-limiter
 spec:
   type: ClusterIP
   selector:

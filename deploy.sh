@@ -38,8 +38,10 @@ then
       --namespace monitoring --create-namespace \
       -f k8s/monitoring/prometheus-values.yaml
     
-    echo "Applying ServiceMonitor..."
+    echo "Applying ServiceMonitor and Dashboards..."
     kubectl apply -f k8s/monitoring/servicemonitor.yaml
+    kubectl apply -f k8s/monitoring/grafana-dashboard-ratelimit.yaml
+    kubectl apply -f k8s/monitoring/grafana-dashboard-jvm.yaml
 else
     echo "Helm not found, skipping monitoring stack installation."
 fi

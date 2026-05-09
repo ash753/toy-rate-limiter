@@ -3,6 +3,7 @@ prometheus:
     serviceMonitorSelector:
       matchLabels:
         release: monitoring
+    serviceMonitorNamespaceSelector: {}
     resources:
       requests:
         cpu: 250m
