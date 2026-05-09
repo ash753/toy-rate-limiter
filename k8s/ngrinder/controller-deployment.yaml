@@ -35,10 +35,10 @@ spec:
           resources:
             requests:
               memory: "2Gi"
-              cpu: "1.0"
+              cpu: "0.5"
             limits:
               memory: "4Gi"
-              cpu: "2.0"
+              cpu: "1.0"
           volumeMounts:
             - name: data
               mountPath: /opt/ngrinder-controller
