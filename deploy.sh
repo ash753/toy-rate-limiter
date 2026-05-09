@@ -20,7 +20,8 @@ echo "Applying Rate Limiter..."
 kubectl apply -f k8s/rate-limiter/
 
 # 5. nGrinder
-echo "Applying nGrinder (PVC, Controller, Agent)..."
+echo "Applying nGrinder (Logback Config, PVC, Controller, Agent)..."
+kubectl apply -f k8s/ngrinder/agent-logback-configmap.yaml
 kubectl apply -f k8s/ngrinder/
 
 # 6. Ingress
