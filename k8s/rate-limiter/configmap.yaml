@@ -25,7 +25,7 @@ data:
       routes:
         - path-pattern: "/api/foo/**"
           target-uri: "http://test-api:8081"
-          limit: 100
+          limit: 1000000
           per-ip: false
         - path-pattern: "/api/bar/**"
           target-uri: "http://test-api:8081"
