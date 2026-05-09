@@ -47,3 +47,6 @@ data:
         web:
           exposure:
             include: health, info, prometheus
+    logging:
+      level:
+        reactor.netty.channel.FluxReceive: ERROR
