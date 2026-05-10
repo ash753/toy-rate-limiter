@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ngrinder-agent-logback
+  namespace: rate-limiter
+data:
+  logback.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <configuration>
+      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %message%n</pattern>
+        </encoder>
+      </appender>
+
+      <root level="INFO">
+        <appender-ref ref="STDOUT" />
+      </root>
+
+      <!-- DNS Lookup 디버그 로그 차단 -->
+      <logger name="org.xbill.DNS" level="WARN" />
+      
+      <!-- nGrinder 관련 로그 수준 조정 -->
+      <logger name="org.ngrinder" level="INFO" />
+      <logger name="net.grinder" level="INFO" />
+    </configuration>

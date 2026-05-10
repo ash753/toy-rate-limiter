@@ -6,7 +6,7 @@
 - [x] 이미지 빌드 완료 (`rate-limiter:0.1.0`, `test-api:0.1.0`)
 - [x] K8s Manifest 작성 완료 (Namespace, ConfigMap, Deployment, Service, Ingress)
 - [x] nGrinder Manifest 작성 완료 (Controller, Agent)
-- [ ] Helm을 통한 모니터링 스택 구축
+- [x] Helm을 통한 모니터링 스택 구축
 - [x] 통합 배포 스크립트 작성 완료 (`deploy.sh`)
 
 ## 로컬 환경 설정 (Docker Desktop)
@@ -51,7 +51,8 @@
 
 #### 3-5. nGrinder
 - **ngrinder-controller**: Deployment (1 replica), CPU 2.0/Memory 1.5GB
-- **ngrinder-agent**: Deployment (**2 replicas**), CPU 1.0/Memory 512MB
+  - **데이터 보존**: `PersistentVolumeClaim`을 사용하여 `/opt/ngrinder-controller` 데이터 영속성 확보.
+- **ngrinder-agent**: Deployment (2 replicas), CPU 1.0/Memory 512MB
 
 ### 4. 모니터링 스택 (Helm)
 

@@ -42,6 +42,8 @@ kind: Service
 metadata:
   name: test-api
   namespace: rate-limiter
+  labels:
+    app: test-api
 spec:
   type: ClusterIP
   selector:

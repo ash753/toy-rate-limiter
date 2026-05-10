@@ -20,10 +20,20 @@ spec:
           env:
             - name: NGRINDER_CONTROLLER_HOST
               value: "ngrinder-controller"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Dlogback.configurationFile=/opt/ngrinder-agent/logback.xml"
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "0.5"
+              memory: "2Gi"
+              cpu: "2.0"
             limits:
-              memory: "512Mi"
-              cpu: "1.0"
+              memory: "2Gi"
+              cpu: "4.0"
+          volumeMounts:
+            - name: logback-config
+              mountPath: /opt/ngrinder-agent/logback.xml
+              subPath: logback.xml
+      volumes:
+        - name: logback-config
+          configMap:
+            name: ngrinder-agent-logback

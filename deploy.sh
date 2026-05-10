@@ -20,7 +20,8 @@ echo "Applying Rate Limiter..."
 kubectl apply -f k8s/rate-limiter/
 
 # 5. nGrinder
-echo "Applying nGrinder..."
+echo "Applying nGrinder (Logback Config, PVC, Controller, Agent)..."
+kubectl apply -f k8s/ngrinder/agent-logback-configmap.yaml
 kubectl apply -f k8s/ngrinder/
 
 # 6. Ingress
@@ -38,8 +39,10 @@ then
       --namespace monitoring --create-namespace \
       -f k8s/monitoring/prometheus-values.yaml
     
-    echo "Applying ServiceMonitor..."
+    echo "Applying ServiceMonitor and Dashboards..."
     kubectl apply -f k8s/monitoring/servicemonitor.yaml
+    kubectl apply -f k8s/monitoring/grafana-dashboard-ratelimit.yaml
+    kubectl apply -f k8s/monitoring/grafana-dashboard-jvm.yaml
 else
     echo "Helm not found, skipping monitoring stack installation."
 fi

@@ -99,9 +99,10 @@ rate-limit:
 
 ## Kubernetes 배포
 
-- 서버 1 (Rate Limiter): Deployment, replica 2개, LoadBalancer
-- 서버 2 (Test API): Deployment, replica 2개, ClusterIP (서버 1에서만 접근)
-- Redis: 별도 배포
+- 서버 1 (Rate Limiter): Deployment, replica 2개, ClusterIP
+- 서버 2 (Test API): Deployment, replica 1개, ClusterIP (서버 1에서만 접근)
+- Redis: 별도 배포 (1 Instance)
+- Ingress: 외부 트래픽을 서버 1로 라우팅 (Host 기반)
 
 # 테스트 / 검증
 

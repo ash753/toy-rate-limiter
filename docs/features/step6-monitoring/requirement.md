@@ -17,9 +17,9 @@
 | 메트릭 이름 | 타입 | 라벨 | 설명 |
 |---|---|---|---|
 | `ratelimit_requests_total` | Counter | `endpoint`, `result` (`allowed`/`blocked`/`failopen`) | 엔드포인트별 처리 결과 |
-| `ratelimit_redis_latency_seconds` | Histogram | — | Redis 호출 지연 분포 |
+| `ratelimit_redis_latency_seconds` | Timer | — | Redis 호출 지연 분포 |
 | `ratelimit_failopen_total` | Counter | `reason` (에러 유형) | Fail-open 발생 횟수 |
-| `resilience4j_circuitbreaker_state` | Gauge | `state` | Resilience4j 기본 메트릭 활용 (0=CLOSED, 1=OPEN, 2=HALF_OPEN) |
+| `resilience4j_circuitbreaker_state` | Gauge | `state`, `name` | Resilience4j 기본 메트릭 활용 |
 
 > 참고: "차단 비율", "요청 수"는 `ratelimit_requests_total`에서 PromQL로 파생 가능 (별도 메트릭 불필요).
 
