@@ -4,7 +4,7 @@
 
 - [x] **Dockerfile 작성**: `rate-limiter`, `test-api` 각각 멀티 스테이지 빌드 Dockerfile 작성 완료.
 - [x] **Kubernetes Manifest**: `k8s/` 하위 매니페스트 작성 완료 (Namespace, ConfigMap, Deployment, Service, Ingress).
-- [ ] **Helm 모니터링**: `kube-prometheus-stack` 설치 및 설정 필요.
+- [x] **Helm 모니터링**: `kube-prometheus-stack` 설치 및 설정 완료.
 - [x] **nGrinder 배포**: Controller 및 Agent를 K8s 내부에 배포하기 위한 매니페스트 작성 완료.
 - [x] **배포 스크립트**: `deploy.sh` 작성 완료.
 
@@ -20,13 +20,15 @@ Docker Desktop에서 사용할 수 있는 전체 리소스를 다음과 같이 �
 ### 컴포넌트별 리소스 배분 계획
 | 컴포넌트 | Replicas | CPU (Request/Limit) | Memory (Request/Limit) | 합계 (Max Limit) |
 | :--- | :---: | :--- | :--- | :--- |
-| **rate-limiter** | 2 | 1.0 / 1.5 | 512MB / 1GB | 3.0 CPU, 2.0GB |
+| **rate-limiter** | 2 | 0.5 / 1.0 | 512MB / 512MB | 2.0 CPU, 1.0GB |
 | **test-api** | 1 | 0.5 / 1.0 | 256MB / 512MB | 1.0 CPU, 0.5GB |
 | **Redis** | 1 | 0.5 / 1.0 | 256MB / 512MB | 1.0 CPU, 0.5GB |
-| **nGrinder Controller** | 1 | 1.0 / 2.0 | 1GB / 1.5GB | 2.0 CPU, 1.5GB |
-| **nGrinder Agent** | 2 | 0.5 / 1.0 | 512MB / 512MB | 2.0 CPU, 1.0GB |
+| **nGrinder Controller** | 1 | 0.5 / 1.0 | 2GB / 4GB | 1.0 CPU, 4.0GB |
+| **nGrinder Agent** | 2 | 2.0 / 4.0 | 2GB / 2GB | 8.0 CPU, 4.0GB |
 | **Monitoring (Helm)** | - | ~0.5 / 1.0 | ~512MB / 1.0GB | 1.0 CPU, 1.0GB |
-| **계 (Total)** | | | | **10.0 CPU, 6.5GB** |
+| **계 (Total)** | | | | **14.0 CPU, 11.0GB** |
+
+> **참고**: 실제 부하 테스트 시 nGrinder Agent의 높은 리소스 요구량으로 인해 전체 할당량이 초기 목표(10 CPU, 7GB)를 초과하여 구성되었습니다.
 
 ## 범위
 
@@ -42,7 +44,7 @@ Docker Desktop에서 사용할 수 있는 전체 리소스를 다음과 같이 �
 
 ### rate-limiter (서버 1)
 - **Deployment**: replica 2
-- **Resources**: CPU 1.5 Limit, Memory 1GB Limit (per pod)
+- **Resources**: CPU 1.0 Limit, Memory 512MB Limit (per pod)
 - **Service**: ClusterIP (Port 8080)
 - **Ingress**: 외부 진입점, **X-Forwarded-For 전파 설정**
 - **ConfigMap**: `application.yml` 주입
@@ -64,12 +66,12 @@ Docker Desktop에서 사용할 수 있는 전체 리소스를 다음과 같이 �
 ### nGrinder (부하 테스트)
 - **ngrinder-controller**: 
   - Deployment (1 replica)
-  - Resources: CPU 2.0 Limit, Memory 1.5GB Limit
+  - Resources: CPU 1.0 Limit, Memory 4.0GB Limit
   - Ingress: 웹 UI 노출 (Port 9000 -> 80)
   - Service: ClusterIP (Port 16001, 12000-12009)
-- **ngrinder-agent**:
+- **ngrinder-agent**: 
   - Deployment (2 replicas)
-  - Resources: CPU 1.0 Limit, Memory 512MB Limit (per pod)
+  - Resources: CPU 4.0 Limit, Memory 2.0GB Limit (per pod)
   - 환경변수로 Controller 주소 설정
 
 ## Docker 이미지

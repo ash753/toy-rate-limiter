@@ -24,8 +24,8 @@
 1. 요청 path로 `RouteMatcher.match(path)` 호출 → 매칭되는 `RouteConfig` 및 설정된 limit 획득.
 2. 매칭되는 경로가 없는 경우 `chain.filter(exchange)`로 즉시 다음 필터로 넘김.
 3. 키 prefix 생성:
-   - `per-ip=false`: `rl:{matchedPath}`
-   - `per-ip=true`: `rl:{matchedPath}:{ip}`
+   - `per-ip=false`: `rl:{pathPattern}`
+   - `per-ip=true`: `rl:{pathPattern}:{ip}`
 4. `RateLimiter.check(keyPrefix, limit)` 호출 → `RateLimitResult` 획득.
 5. 응답 헤더 설정 (`RateLimitConstants` 정의 값 사용):
    - 공통: `X-RateLimit-Limit`, `X-RateLimit-Remaining`
